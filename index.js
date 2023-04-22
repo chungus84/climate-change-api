@@ -35,7 +35,7 @@ const newspapers = [
 
 ]
 
-// array to save hrefs of articles
+// array to save article objects
 const articles = [];
 
 newspapers.forEach(newspaper => {
