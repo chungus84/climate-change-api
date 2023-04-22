@@ -45,7 +45,7 @@ newspapers.forEach(newspaper => {
     const $ = cheerio.load(html);
 
     $('a:contains("climate")', html).each(function () {
-      const title = $(this).text().replace(/\s+/g, ' ');
+      const title = $(this).text().replace(/\s+/g, ' ').trim();
       const url = $(this).attr('href');
 
       articles.push({
@@ -65,6 +65,34 @@ app.get('/', (req, res) => {
 // set /news route to guardian website to scrape climate change news using axios and cheerio
 app.get('/news', (req, res) => {
   res.json(articles);
+});
+
+// get information from one news article
+app.get('/news/:newspaperId', async (req, res) => {
+  const newspaperId = req.params.newspaperId;
+
+  const newspaperAddress = newspapers.filter(newspaper => newspaper.name == newspaperId)[0].address;
+  const newspaperBase = newspapers.filter(newspaper => newspaper.name == newspaperId)[0].base
+
+
+
+  axios.get(newspaperAddress)
+    .then(response => {
+      const html = response.data;
+      const $ = cheerio.load(html);
+      const specificArticles = [];
+
+      $('a:contains("climate")', html).each(function () {
+        const title = $(this).text().replace(/\s+/g, ' ').trim();
+        const url = $(this).attr('href');
+        specificArticles.push({
+          title,
+          url: newspaperBase + url,
+          source: newspaperId
+        })
+      })
+      res.json(specificArticles);
+    }).catch(err => console.log(err));
 });
 
 // express (app) listen for PORT 8000 with a backend callback
